@@ -1,3 +1,37 @@
+// Validation
+interface Validatable {
+	value: string | number;
+	required?: boolean,
+	minLength?: number,
+	maxLength?: number,
+	min?: number,
+	max?: number,
+}
+
+function validate(obj: Validatable) {
+	if (obj.required) {
+		if (obj.value.toString().length === 0) return false;
+	}
+
+	if (obj.minLength != null && typeof obj.value === 'string') {
+		if (obj.value.length < obj.minLength) return false;
+	}
+
+	if (obj.maxLength != null && typeof obj.value === 'string') {
+		if (obj.value.length > obj.maxLength) return false;
+	}
+
+	if (obj.min != null && typeof obj.value === 'number') {
+		if (obj.value < obj.min) return false;
+	}
+
+	if (obj.max != null && typeof obj.value === 'number') {
+		if (obj.value > obj.max) return false;
+	}
+
+	return true;
+}
+
 // Autobind decorator
 function Autobind(
 	_: any,
@@ -42,13 +76,41 @@ class ProjectInput {
 	private gatherUserInput(): [string, string, number] | void {
 		const title = this.titleInputEl.value.trim();
 		const description = this.descriptionInputEl.value.trim();
-		const people = this.peopleInputEl.value.trim();
+		const people = parseInt(this.peopleInputEl.value.trim());
 
-		if (title.length === 0 || description.length === 0 || people.length === 0) {
-			return alert('Fill all fields!')
+		const titleValidatable: Validatable = {
+			value: title,
+			required: true,
+			minLength: 2,
+		}
+		const descriptionValidatable: Validatable = {
+			value: description,
+			required: true,
+			minLength: 5,
+			maxLength: 20,
+		}
+		const peopleValidatable: Validatable = {
+			value: people,
+			required: true,
+			min: 1,
+			max: 5,
 		}
 
-		return [title, description, parseInt(people)];
+		if (
+			validate(titleValidatable) === false ||
+			validate(descriptionValidatable) === false ||
+			validate(peopleValidatable) === false
+		) {
+			return alert('Enter valid values!')
+		}
+
+		return [title, description, people];
+	}
+
+	private clearInputs() {
+		this.titleInputEl.value = '';
+		this.descriptionInputEl.value = '';
+		this.peopleInputEl.value = '';
 	}
 
 	@Autobind
@@ -59,6 +121,7 @@ class ProjectInput {
 		if (Array.isArray(userInput)) {
 			const [title, description, people] = userInput;
 			console.log(title, description, people);
+			this.clearInputs();
 		}
 	}
 
