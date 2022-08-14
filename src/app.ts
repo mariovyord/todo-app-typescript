@@ -48,35 +48,64 @@ function Autobind(
 	return adjDescriptor;
 }
 
+// Project List Class
+class ProjectList {
+	templateElement: HTMLTemplateElement;
+	hostElement: HTMLDivElement;
+	element: HTMLElement;
+
+	constructor(private type: 'active' | 'finished') {
+		this.templateElement = document.getElementById('project-list')! as HTMLTemplateElement;
+		this.hostElement = document.getElementById('app')! as HTMLDivElement;
+
+		const importedNode = document.importNode(this.templateElement.content, true);
+		this.element = importedNode.firstElementChild as HTMLElement;
+		this.element.id = `${this.type}-projects`;
+
+		this.attach();
+		this.renderContent();
+	}
+
+	private renderContent() {
+		const listId = `${this.type}-projects-list`;
+		this.element.querySelector('ul')!.id = listId;
+		this.element.querySelector('h2')!.textContent = this.type.toUpperCase() + ' PROJECTS';
+	}
+
+	private attach() {
+		this.hostElement.insertAdjacentElement('beforeend', this.element);
+	}
+}
+
 // Project Input Class
 class ProjectInput {
-	templateEl: HTMLTemplateElement;
-	hostEl: HTMLDivElement;
+	templateElement: HTMLTemplateElement;
+	hostElement: HTMLDivElement;
 	element: HTMLFormElement;
-	titleInputEl: HTMLInputElement;
-	descriptionInputEl: HTMLInputElement;
-	peopleInputEl: HTMLInputElement;
+	titleInputElement: HTMLInputElement;
+	descriptionInputElement: HTMLInputElement;
+	peopleInputElement: HTMLInputElement;
 
 	constructor() {
-		this.templateEl = document.getElementById('project-input') as HTMLTemplateElement;
-		this.hostEl = document.getElementById('app') as HTMLDivElement;
+		this.templateElement = document.getElementById('project-input') as HTMLTemplateElement;
+		this.hostElement = document.getElementById('app') as HTMLDivElement;
 
-		const importedNode = document.importNode(this.templateEl.content, true);
+		const importedNode = document.importNode(this.templateElement.content, true);
 		this.element = importedNode.firstElementChild as HTMLFormElement;
 		this.element.id = 'user-input';
 
-		this.titleInputEl = this.element.querySelector('#title') as HTMLInputElement;
-		this.descriptionInputEl = this.element.querySelector('#description') as HTMLInputElement;
-		this.peopleInputEl = this.element.querySelector('#people') as HTMLInputElement;
+		this.titleInputElement = this.element.querySelector('#title') as HTMLInputElement;
+		this.descriptionInputElement = this.element.querySelector('#description') as HTMLInputElement;
+		this.peopleInputElement = this.element.querySelector('#people') as HTMLInputElement;
 
 		this.configure();
 		this.attach();
 	}
 
 	private gatherUserInput(): [string, string, number] | void {
-		const title = this.titleInputEl.value.trim();
-		const description = this.descriptionInputEl.value.trim();
-		const people = parseInt(this.peopleInputEl.value.trim());
+		const title = this.titleInputElement.value.trim();
+		const description = this.descriptionInputElement.value.trim();
+		const people = parseInt(this.peopleInputElement.value.trim());
 
 		const titleValidatable: Validatable = {
 			value: title,
@@ -108,9 +137,9 @@ class ProjectInput {
 	}
 
 	private clearInputs() {
-		this.titleInputEl.value = '';
-		this.descriptionInputEl.value = '';
-		this.peopleInputEl.value = '';
+		this.titleInputElement.value = '';
+		this.descriptionInputElement.value = '';
+		this.peopleInputElement.value = '';
 	}
 
 	@Autobind
@@ -131,8 +160,10 @@ class ProjectInput {
 	}
 
 	private attach() {
-		this.hostEl.insertAdjacentElement('afterbegin', this.element);
+		this.hostElement.insertAdjacentElement('afterbegin', this.element);
 	}
 }
 
-const prjInput = new ProjectInput();
+const projectInput = new ProjectInput();
+const activeProjectList = new ProjectList('active');
+const finishedProjectList = new ProjectList('finished');
